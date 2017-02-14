@@ -1,0 +1,38 @@
+version: '2'
+
+services:
+  mysql-server:
+    image: mysql
+    environment:
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - MYSQL_ROOT_PASSWORD=zabbix
+
+  zabbix-server-mysql:
+    image: zabbix/zabbix-server-mysql:ubuntu-3.2-latest
+    environment:
+      - DB_SERVER_HOST=mysql-server
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - MYSQL_DATABASE=zabbix
+    depends_on:
+      - mysql-server
+    ports:
+      - 10050:10050
+
+  zabbix-web-nginx-mysql:
+    build: zabbix-web
+    environment:
+      - DB_SERVER_HOST=mysql-server
+      - ZBX_SERVER_HOST=zabbix-server-mysql
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - MYSQL_DATABASE=zabbix
+      - TZ=Asia/Tokyo
+      - COMPOSE_HTTP_TIMEOUT=200
+    depends_on:
+      - mysql-server
+    ports:
+      - 8090:80
+
